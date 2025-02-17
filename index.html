@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện bảng chữ cái tiếng Hàn</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .char-display {
+            font-size: 50px;
+            margin: 20px;
+        }
+        .btn {
+            font-size: 20px;
+            padding: 10px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        @media (max-width: 600px) {
+            .btn {
+                font-size: 16px;
+                padding: 8px;
+                margin: 5px;
+            }
+            .char-display {
+                font-size: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Luyện bảng chữ cái tiếng Hàn</h1>
+    <div class="mode-select">
+        <label><input type="radio" name="mode" value="vowel" checked> Nguyên âm</label>
+        <label><input type="radio" name="mode" value="consonant"> Phụ âm</label>
+        <label><input type="radio" name="mode" value="both"> Cả hai</label>
+    </div>
+    <div class="char-display" id="hangul-char">?</div>
+    <div id="options"></div>
+    <p id="result"></p>
+    <button class="btn" onclick="generateCharacter()">Câu hỏi khác</button>
+    <button class="btn" onclick="speakCharacter()">🔊 Nghe phát âm</button>
+    
+    <script>
+        const vowels = {
+            'ㅏ': 'a', 'ㅑ': 'ya', 'ㅓ': 'ơ', 'ㅕ': 'yơ', 'ㅗ': 'ô', 'ㅛ': 'yô', 'ㅜ': 'u', 'ㅠ': 'yu', 'ㅡ': 'ư', 'ㅣ': 'i',
+            'ㅐ': 'e', 'ㅒ': 'ye', 'ㅔ': 'ê', 'ㅖ': 'yê', 'ㅗㅏ': 'oa', 'ㅗㅐ': 'ue','ㅗㅣ': 'ue' , 'ㅜㅓ': 'uơ', 'ㅜㅔ': 'uê', 'ㅜㅣ': 'uy', 'ㅡㅣ': 'ưi'
+        };
+        const consonants = {
+            'ㄱ': 'k', 'ㄴ': 'n', 'ㄷ': 't', 'ㄹ': 'r/l', 'ㅁ': 'm', 'ㅂ': 'b', 'ㅅ': 's', 'ㅇ': 'ng', 'ㅈ': 'ch', 'ㅊ': "ch'", 'ㅋ': 'kh', 'ㅌ': 'th', 'ㅍ': 'ph', 'ㅎ': 'h'
+        };
+        let currentChar = '';
+        let correctAnswer = '';
+
+        function getSelectedMode() {
+            return document.querySelector('input[name="mode"]:checked').value;
+        }
+
+        function generateCharacter() {
+            let selectedMode = getSelectedMode();
+
+            if (selectedMode === 'both') return;
+
+            let selectedChars = selectedMode === 'vowel' ? vowels : consonants;
+            const keys = Object.keys(selectedChars);
+            currentChar = keys[Math.floor(Math.random() * keys.length)];
+            correctAnswer = selectedChars[currentChar];
+            document.getElementById('hangul-char').innerText = currentChar;
+            document.getElementById('result').innerText = '';
+            generateOptions(selectedChars);
+        }
+
+        function generateOptions(selectedChars) {
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            let options = [correctAnswer];
+            while (options.length < 4) {
+                let randomAnswer = selectedChars[Object.keys(selectedChars)[Math.floor(Math.random() * Object.keys(selectedChars).length)]];
+                if (!options.includes(randomAnswer)) {
+                    options.push(randomAnswer);
+                }
+            }
+            options = options.sort(() => Math.random() - 0.5);
+            options.forEach(option => {
+                let btn = document.createElement('button');
+                btn.innerText = option;
+                btn.className = 'btn';
+                btn.onclick = () => checkAnswer(option);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(answer) {
+            if (answer === correctAnswer) {
+                document.getElementById('result').innerText = '✅ Đúng!';
+            } else {
+                document.getElementById('result').innerText = '❌ Sai!';
+            }
+        }
+
+        function speakCharacter() {
+            const utterance = new SpeechSynthesisUtterance(currentChar);
+            utterance.lang = 'ko-KR';
+            speechSynthesis.speak(utterance);
+        }
+
+        document.querySelectorAll('input[name="mode"]').forEach(input => {
+            input.addEventListener('change', generateCharacter);
+        });
+
+        window.onload = generateCharacter;
+    </script>
+</body>
+</html>
